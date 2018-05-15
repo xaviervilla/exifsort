@@ -1,27 +1,16 @@
-//------------------------------------------------------------------------------
-// File:        example1.cpp
-//
-// Description: Simple example to read metadata from a file
-//
-// Syntax:      example1 FILE
-//
-// License:     Copyright 2013-2016, Phil Harvey (phil at owl.phy.queensu.ca)
-//
-//              This is software, in whole or part, is free for use in
-//              non-commercial applications, provided that this copyright notice
-//              is retained.  A licensing fee may be required for use in a
-//              commercial application.
-//
-// Created:     2013-11-28 - Phil Harvey
-//------------------------------------------------------------------------------
+// Creates a JSON configuration file containing GPS coordinates derived from image metadata taken at unwanted locations
+// Usage "./create_config [path_to_exclusionaries]"
 
 #include <iostream>
 #include <fstream>
 #include <string.h>
+
 #include "inc/ExifTool.h"
 #include "nlohmann/json.hpp"
 
-#define CONFIG_FILE "inclusion_exclusion_parameters.json"
+#include "Place.hpp"
+
+#define CONFIG_FILE "inclusion_exclusion_parameters_CREATED.json"
 
 // for convenience
 using json = nlohmann::json;
@@ -31,34 +20,27 @@ using namespace std;
 int main(int argc, char **argv)
 {
     // read a JSON file
-    ifstream i(CONFIG_FILE);
+//    ifstream i(CONFIG_FILE);
+//    json j;
+//    i >> j;
+//    i.close();
+    
+    //write a JSON file
     json j;
-    i >> j;
-    i.close();
+    ofstream o(CONFIG_FILE); 
+    o << "{" << endl << setw(4) << "\"to_exclude\": {" << endl << setw(4) <<  "\"GPSPosition\": [";
     
-    // write a JSON file
-    // ofstream o("pretty.json");
-    // o << setw(4) << j << endl;
     
-    cout << endl;
-    cout << "Raw JSON exclusion" << endl;
-    auto excludes = j.find("to_exclude");
-    cout << excludes.value() << endl;
-    
-    cout << endl;
-    cout << "Raw JSON inclusion" << endl;
-    auto includes = j.find("to_include");
-    cout << includes.value() << endl;
-    
-    cout << endl;
-    cout << "Exclude the following:" << endl;
-    for (int i = 0; i < excludes.value()["GPSPosition"].size(); i++){ cout << excludes.value()["GPSPosition"][i] << endl; }
-    
-    cout << endl;
-    cout << "Include the following:" << endl;
-    for (int i = 0; i < includes.value()["Model"].size(); i++){ cout << includes.value()["Model"][i] << endl; }
-    
-
+//    {
+//    "to_exclude": {
+//        "GPSPosition": [
+//            
+//      "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W",
+//            "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W",
+////            "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W"
+//            ]
+//    }
+//    }
 
     if (argc < 2) {
         cout << "Example1: Read metadata from an image." << endl;
@@ -71,17 +53,15 @@ int main(int argc, char **argv)
     TagInfo *info = et->ImageInfo(argv[1]);
     if (info) {
         // print returned information
-        for (TagInfo *i=info; i; i=i->next) {\
-            if(strcmp(i->name, "GPSLatitude") == 0){
-                //cout << i->name << " = " << i->value << endl;
-            }
-            else if(strcmp(i->name, "Model") == 0){
-                //cout << i->name << " = " << i->value << endl;
-            }
-            else{
-                //cout << i->name << " = " << i->value << endl;
-            }
-            
+        Place* location;
+        for (TagInfo *i=info; i; i=i->next) {
+            if(strcmp(i->name, "GPSPosition") == 0){
+                location = new Place(i->value, 0.6f);
+                //cout << "x: " << location->getLongitude() << ", y: " << location->getLatitude() << endl;
+                o << setw(4) << (i->value) << endl;//cords
+                cout << setw(4) << (i->value) << endl;
+                delete location;
+            }          
         }
         // we are responsible for deleting the information when done
         delete info;
@@ -92,5 +72,11 @@ int main(int argc, char **argv)
     char *err = et->GetError();
     if (err) cout << err;
     delete et;      // delete our ExifTool object
+    o << setw(4) << "]" << endl << "}" << endl << "}";
+    o.close();	// close output stream
     return 0;
+}
+
+char* formatGPSPosition(char *position){
+    
 }
