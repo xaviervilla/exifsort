@@ -4,5 +4,5 @@
 	},
 	"to_exclude"	:	{
 		"GPSPosition" 	: 	["37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W"]
-	},
+	}
 }

@@ -16,14 +16,26 @@
 //------------------------------------------------------------------------------
 
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include "inc/ExifTool.h"
 #include "nlohmann/json.hpp"
+
+#define CONFIG_FILE "inclusion_exclusion_parameters.json"
+
+// for convenience
+using json = nlohmann::json;
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
+    // read a JSON file
+    ifstream i(CONFIG_FILE);
+    json j;
+    i >> j;
+    i.close();
+
     if (argc < 2) {
         cout << "Example1: Read metadata from an image." << endl;
         cout << "Please specify input file name" << endl;
