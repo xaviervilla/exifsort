@@ -35,6 +35,30 @@ int main(int argc, char **argv)
     json j;
     i >> j;
     i.close();
+    
+    // write a JSON file
+    // ofstream o("pretty.json");
+    // o << setw(4) << j << endl;
+    
+    cout << endl;
+    cout << "Raw JSON exclusion" << endl;
+    auto excludes = j.find("to_exclude");
+    cout << excludes.value() << endl;
+    
+    cout << endl;
+    cout << "Raw JSON inclusion" << endl;
+    auto includes = j.find("to_include");
+    cout << includes.value() << endl;
+    
+    cout << endl;
+    cout << "Exclude the following:" << endl;
+    for (int i = 0; i < excludes.value()["GPSPosition"].size(); i++){ cout << excludes.value()["GPSPosition"][i] << endl; }
+    
+    cout << endl;
+    cout << "Include the following:" << endl;
+    for (int i = 0; i < includes.value()["Model"].size(); i++){ cout << includes.value()["Model"][i] << endl; }
+    
+
 
     if (argc < 2) {
         cout << "Example1: Read metadata from an image." << endl;
@@ -49,13 +73,13 @@ int main(int argc, char **argv)
         // print returned information
         for (TagInfo *i=info; i; i=i->next) {\
             if(strcmp(i->name, "GPSLatitude") == 0){
-                cout << i->name << " = " << i->value << endl;
+                //cout << i->name << " = " << i->value << endl;
             }
             else if(strcmp(i->name, "Model") == 0){
-                cout << i->name << " = " << i->value << endl;
+                //cout << i->name << " = " << i->value << endl;
             }
             else{
-                cout << i->name << " = " << i->value << endl;
+                //cout << i->name << " = " << i->value << endl;
             }
             
         }

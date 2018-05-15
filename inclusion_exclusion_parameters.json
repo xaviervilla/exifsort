@@ -1,8 +1,15 @@
 {
-	"to_include"	:	{
-		"Model"		:	["iPhone 4", "iPhone 5c", "iPhone 6s", "iPhone 7 Plus"]
-	},
-	"to_exclude"	:	{
-		"GPSPosition" 	: 	["37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W"]
-	}
+    "to_exclude": {
+        "GPSPosition": [
+            "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W"
+        ]
+    },
+    "to_include": {
+        "Model": [
+            "iPhone 4",
+            "iPhone 5c",
+            "iPhone 6s",
+            "iPhone 7 Plus"
+        ]
+    }
 }
