@@ -349,7 +349,7 @@ TagInfo *ExifTool::GetInfo(int cmdNum, double timeout)
             // create new TagInfo structure for this tag
             next = new TagInfo;
             if (!next) break;
-            // extract tag/group names                    
+            // extract tag/group names
             int g = 0;
             for (;;) {
                 char ch = *p1;

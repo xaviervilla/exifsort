@@ -3,7 +3,7 @@ OPT = -g
 INC = -I inc
 
 OBJ = src/ExifTool.o src/ExifToolPipe.o src/TagInfo.o Place.o
-HDR = inc/ExifTool.h inc/ExifToolPipe.h inc/TagInfo.h Place.hpp
+HDR = src/ExifTool.h src/ExifToolPipe.h src/TagInfo.h Place.hpp
 
 all:    exifsort 
 

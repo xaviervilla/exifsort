@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string.h>
 
-#include "inc/ExifTool.h"
+#include "src/ExifTool.h"
 #include "nlohmann/json.hpp"
 
 #include "Place.hpp"
@@ -24,17 +24,15 @@ int main(int argc, char **argv)
 //    json j;
 //    i >> j;
 //    i.close();
-    
+
     //write a JSON file
     json j;
-    ofstream o(CONFIG_FILE); 
+    ofstream o(CONFIG_FILE);
     o << "{" << endl << setw(4) << "\"to_exclude\": {" << endl << setw(4) <<  "\"GPSPosition\": [";
-    
-    
 //    {
 //    "to_exclude": {
 //        "GPSPosition": [
-//            
+//
 //      "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W",
 //            "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W",
 ////            "37 deg 21' 54.65\" N, 120 deg 37' 3.91\" W"
@@ -47,7 +45,7 @@ int main(int argc, char **argv)
         cout << "Please specify input file name" << endl;
         return 1;
     }
-    
+
     // create new Place Object
     Place* location = new Place();
     // create our ExifTool object
@@ -59,11 +57,11 @@ int main(int argc, char **argv)
         for (TagInfo *i=info; i; i=i->next) {
             if(strcmp(i->name, "GPSPosition") == 0){
                 location->setPlace(i->value, 0.6f);
-                cout << "Longitude: " << location->getLongitude() << ",     Latitude: " << location->getLatitude() << endl << endl;
+                cout << "Latitude: " << location->getLatitude() << ",     Longitude: " << location->getLongitude() << endl << endl;
                 //o << setw(4) << (i->value) << endl;//cords
                 //cout << "ivalue") << (i->value) << endl << endl;
                 //delete location;
-            }          
+            }
         }
         // we are responsible for deleting the information when done
         delete info;
@@ -81,5 +79,5 @@ int main(int argc, char **argv)
 }
 
 char* formatGPSPosition(char *position){
-    
+
 }
