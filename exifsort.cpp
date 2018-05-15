@@ -18,6 +18,7 @@
 #include <iostream>
 #include <string.h>
 #include "inc/ExifTool.h"
+#include "nlohmann/json.hpp"
 
 using namespace std;
 
@@ -41,9 +42,9 @@ int main(int argc, char **argv)
             else if(strcmp(i->name, "Model") == 0){
                 cout << i->name << " = " << i->value << endl;
             }
-            //else if(strcmp(i->name, "GPSLatitude") == 0){
-            //    cout << i->name << " = " << i->value << endl;
-            //}
+            else{
+                cout << i->name << " = " << i->value << endl;
+            }
             
         }
         // we are responsible for deleting the information when done

@@ -1,4 +1,4 @@
-CPP = g++
+CPP = g++ -std=c++11
 OPT = -g
 INC = -I inc
 
