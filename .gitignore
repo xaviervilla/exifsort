@@ -1,6 +1,9 @@
 # Main binary
 exifsort
 
+# Private images
+pics\ to\ be\ omitted
+
 # Prerequisites
 *.d
 
