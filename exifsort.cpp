@@ -47,24 +47,27 @@ int main(int argc, char **argv)
         cout << "Please specify input file name" << endl;
         return 1;
     }
+    
+    // create new Place Object
+    Place* location = new Place();
     // create our ExifTool object
     ExifTool *et = new ExifTool();
     // read metadata from the image
     TagInfo *info = et->ImageInfo(argv[1]);
     if (info) {
         // print returned information
-        Place* location;
         for (TagInfo *i=info; i; i=i->next) {
             if(strcmp(i->name, "GPSPosition") == 0){
-                location = new Place(i->value, 0.6f);
-                //cout << "x: " << location->getLongitude() << ", y: " << location->getLatitude() << endl;
-                o << setw(4) << (i->value) << endl;//cords
-                cout << setw(4) << (i->value) << endl;
-                delete location;
+                location->setPlace(i->value, 0.6f);
+                cout << "Longitude: " << location->getLongitude() << ",     Latitude: " << location->getLatitude() << endl << endl;
+                //o << setw(4) << (i->value) << endl;//cords
+                //cout << "ivalue") << (i->value) << endl << endl;
+                //delete location;
             }          
         }
         // we are responsible for deleting the information when done
         delete info;
+        delete location;
     } else if (et->LastComplete() <= 0) {
         cerr << "Error executing exiftool!" << endl;
     }

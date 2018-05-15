@@ -9,9 +9,10 @@ class Place{
     float latitude;
     float radius;
     float stripAndConvert(char* half);
-    int power(int n, int m);
+    float power(int n, int m);
 public:
-    Place(char *GPSPosition, float radius);
+    Place();
+    void setPlace(char *GPSPosition, float radius);
     bool samePlace(char *GPSPosition);
     float getLongitude();
     float getLatitude();
