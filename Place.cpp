@@ -6,7 +6,7 @@ Place::Place(){
     this->latitude = 0.0f;
 }
 
-void Place::setPlace(char *GPSPosition, float radius){
+void Place::setPlace(char *GPSPosition, float radius = 0.01){
     this->radius = radius;
 
     // Make a copy before we fuck it up
@@ -74,3 +74,5 @@ float Place::stripAndConvert(char *half){
 float Place::getLongitude(){ return longitude; }
 
 float Place::getLatitude(){ return latitude; }
+
+float Place::getRadius(){ return radius;}

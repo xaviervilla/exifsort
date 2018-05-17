@@ -17,6 +17,7 @@ public:
     bool samePlace(char *GPSPosition);
     float getLongitude();
     float getLatitude();
+    float getRadius();
 };
 
 #endif
