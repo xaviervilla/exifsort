@@ -9,20 +9,18 @@ Place::Place(){
 void Place::setPlace(char *GPSPosition, float radius){
     this->radius = radius;
 
-    char* p = strtok (GPSPosition,",");
-
+    // Make a copy before we fuck it up
+    char cpy[strlen(GPSPosition)];
+    for(int i=0; i < strlen(GPSPosition); i++){
+        cpy[i] = GPSPosition[i];
+    }
+    cpy[strlen(GPSPosition)] = '\0';
+    
+    char* p = strtok (cpy,",");
     this->latitude = stripAndConvert(p); // North/South
 
     p = strtok(NULL, ",");
     this->longitude = stripAndConvert(p); // East/West
-}
-
-float Place::power(int n,int m)
-{
-    if(m==1)
-        return n;
-    else
-        return n*(power(n,m-1));
 }
 
 float Place::stripAndConvert(char *half){
@@ -35,12 +33,14 @@ float Place::stripAndConvert(char *half){
     bool dot = false;
 
     //tmp is a string float
-    float result= 0.0f;
+    float result = 0.0f;
     int len = 0;
     int dotpos = 0;
     // Finding the character whose
     // ASCII value fall under this
     // range
+    
+    // 3 loops, one for minutes, seconds, degrees
     while(j < 3){
         while( !((half[i] >= '0' && half[i] <= '9') || half[i] == '.') )
         {
@@ -53,39 +53,22 @@ float Place::stripAndConvert(char *half){
             k++;
             i++;
         }
-        
+        tmp[k] = '\0';
         //tmp is a string float
         result = 0.0f;
         len = k;
         dotpos = 0;
-
-        for (int n = 0; n < len; n++)
-        {    if (tmp[n] == '.')
-            {
-                dotpos = len - n - 1;
-                dot = true;
-            }
-            else
-                result = result * 10 + (tmp[n]-'0');
-        }
-
-        if(dotpos)
-            result = result / power(10, dotpos);//segfault
         
-        // Add negative
-        while(i < strlen(half)){
-            if(half[i] == 'S' || half[i] == 'W'){
-                result = 0 - result;
-                break;
-            }
-            i++;
-        }
+        result = atof(tmp);
         
         dms[j] = result;
         j++;
         k = 0;
     }
-    return (dms[0] + dms[1]/60.0f + dms[2]/3600.0f);
+    
+    if(half[i+2] == 'W' || half[i+2] == 'S')
+        return -(dms[0] + dms[1]/60.0 + dms[2]/3600.0);
+    return (dms[0] + dms[1]/60.0 + dms[2]/3600.0);
 }
 
 float Place::getLongitude(){ return longitude; }
