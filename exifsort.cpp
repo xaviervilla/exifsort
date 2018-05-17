@@ -125,10 +125,41 @@ int buildInclusions(char** arg){
 }
 
 
-
 int filter(char **arg){
+    // read JSON inclusion file
+    ifstream is(INCLUSIONARY_PARAMETERS);
+    json inc;
+    is >> inc;
+    is.close();
+    // read JSON inclusion file
+    ifstream es(EXCLUSIONARY_PARAMETERS);
+    json exc;
+    es >> exc;
+    es.close();
+    
+    cout << endl;
+    cout << "Raw JSON exclusion" << endl;
+    auto excludes = exc.find("to_exclude");
+    cout << excludes.value() << endl;
+    
+    cout << endl;
+    cout << "Raw JSON inclusion" << endl;
+    auto includes = inc.find("to_include");
+    cout << includes.value() << endl;
+    
+    cout << endl;
+    cout << "Exclude the following:" << endl;
+    for (int i = 0; i < excludes.value()["GPSPosition"].size(); i++){ cout << excludes.value()["GPSPosition"][i] << endl; }
+    
+    cout << endl;
+    cout << "Include the following:" << endl;
+    for (int i = 0; i < includes.value()["Model"].size(); i++){ cout << includes.value()["Model"][i] << endl; }
+    
+    cout << endl;
+    
     return 0;
 }
+
 
 void readRights(){
         cout << "Usage:" << endl << endl;
@@ -143,9 +174,7 @@ void readRights(){
         cout << "This filtering process utilizes two methods to screen image files. 1) This option recursively checks the Model of camera and/or phone used to take the photo, and compares it to a list of inclusionary parameters saved in a JSON file. These inclusionary parameters can be created using the `-build-inclusions` flag. If the camera or phone's model checked is not an inclusionary parameter, it will be immediately moved to the deleted folder. 2) This option also recursively checks the GPS coordinates of all images in the directory provided, comparing the GPS coordinates with exclusion parameters saved in a JSON file. These exclusionary parameters can be created using the `-build-exclusions` flag. If any image in the directory provided is within radius of an exclusion parameter, it will be moved to the deleted folder." << endl << endl;
     }
 
-int main(int argc, char **argv)
-{
-
+int main(int argc, char **argv){
     if (argc < 3) {
         readRights();
         return 1;
