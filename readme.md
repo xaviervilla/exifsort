@@ -10,6 +10,7 @@ sort-by-exif uses the ExifTool Library to parse metadata and organize photos in 
 
 # Usage:
 
+Before the first run, exifsort must be compiled. On Linux, this can be done by running `make` in the program's root directory.
 
 `./exifsort -build-exclusions (Optionally: -r <radius>) <filepath_to_exclusions>`
 
