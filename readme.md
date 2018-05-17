@@ -29,7 +29,7 @@ Exifsort follows a general work flow.
 - Finally, we filter. `./exifsort -filter 'images/photos - to be filtered' 'images/photos - finished filtering'`
 
 
-##More notes:##
+## More notes: ##
 - This repository should be OS independant, but is currently only tested on Linux.
 
 - In order for this to work, exiftool must be present on system. For linux, you may install using `sudo apt-get install exiftool`

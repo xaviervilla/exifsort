@@ -1,6 +1,3 @@
-// Creates a JSON configuration file containing GPS coordinates derived from image metadata taken at unwanted locations
-// Usage "./create_config [path_to_exclusionaries]"
-
 #include <iostream>
 #include <fstream>
 #include <string.h>
@@ -13,8 +10,8 @@
 // Created Library
 #include "Place.hpp"
 
-#define EXCLUSIONARY_PARAMETERS "to_exlcude.json"
-#define INCLUSIONARY_PARAMETERS "to_inclcude.json"
+#define EXCLUSIONARY_PARAMETERS "parameters/to_exlcude.json"
+#define INCLUSIONARY_PARAMETERS "parameters/to_inclcude.json"
 
 // for convenience
 using json = nlohmann::json;
