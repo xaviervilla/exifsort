@@ -1,6 +1,9 @@
 {
 	"to_include": {
 		"Model": [
+			"iPhone 6",
+			"iPhone 4",
+			"iPhone 5s",
 			"iPhone 7 Plus"
 		]
 	}

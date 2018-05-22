@@ -7,8 +7,9 @@
 #include "src/ExifTool.h"
 #include "nlohmann/json.hpp"
 
-// Created Library
+// Created Libraries
 #include "Place.hpp"
+#include "ModelList.hpp"
 
 #define EXCLUSIONARY_PARAMETERS "parameters/to_exlcude.json"
 #define INCLUSIONARY_PARAMETERS "parameters/to_inclcude.json"
@@ -37,21 +38,19 @@ int buildExclusions(char** arg){
     ofstream f(EXCLUSIONARY_PARAMETERS);
     ostringstream o;
     f << "{" << endl << "\t" << "\"to_exclude\": {" << endl << "\t\t" <<  "\"GPSPosition\": [" << endl;
-    // temporary string for comma purposes
 
     if (info) {
         // print and save returned information
-        string filename;
         for (TagInfo *i=info; i; i=i->next) {
-            if (!strcmp(i->name, "FileName")) filename = i->value;
             if(strcmp(i->name, "GPSPosition") == 0){
                 location->setPlace(i->value, radius);
                 f << o.str();
                 o.str("");
-                cout << filename << ":" << endl << i->value << endl;
                 o << "\t\t\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "," << location->getRadius() << "\"," << endl;
+                std::cout <<  "detected:\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "\"" << std::endl;
             }
         }
+        std::cout <<  "detected:\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "\"" << std::endl;
         f << "\t\t\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "," << location->getRadius() << "\"" << endl;
         // we are responsible for deleting the information when done
         delete info;
@@ -73,33 +72,40 @@ int buildExclusions(char** arg){
 
 
 int buildInclusions(char** arg){
+    // Create a linked-list to store device models in
+    ModelList *list = new ModelList();
+    
     // create our ExifTool object
     ExifTool *et = new ExifTool();
     // read metadata from the image
     TagInfo *info = et->ImageInfo(arg[2]);
 
-    // write a JSON file to string stream
+    // write a JSON file
     ofstream f(INCLUSIONARY_PARAMETERS);
-    ostringstream o;
     f << "{" << endl << "\t" << "\"to_include\": {" << endl << "\t\t" <<  "\"Model\": [" << endl;
-    // temporary string for comma purposes
 
     if (info) {
-        // print and save returned information
+        // create a linked list of devices without duplicates
         string filename;
         string tmp;
         TagInfo *i;
         for (i=info; i; i=i->next) {
-            if (!strcmp(i->name, "FileName")) filename = i->value;
             if(strcmp(i->name, "Model") == 0){
-                f << o.str();
-                o.str("");
-                tmp = i->value;
-                cout << filename << ":" << endl << tmp << endl;
-                o << "\t\t\t" << "\"" << tmp << "\"," << endl;
+                list->addModel(i->value);
             }
         }
-        f << "\t\t\t" << "\"" << tmp << "\"" << endl;
+
+        // Print each link in the list to the JSON file
+        Model *head = list->getHead();
+        Model *tail = list->getTail();
+        Model *temp = head;
+        
+        while(temp->next() != tail){
+            f << "\t\t\t" << "\"" << temp->modelString() << "\"," << endl;
+            temp = temp->next();
+        }
+        f << "\t\t\t" << "\"" << temp->modelString() << "\"" << endl;
+        
         // we are responsible for deleting the information when done
         delete info;
         delete i;
@@ -117,6 +123,7 @@ int buildInclusions(char** arg){
     // print exiftool stderr messages
     char *err = et->GetError();
     if (err) cout << err;
+    delete list;    // delete our linked list
     delete et;      // delete our ExifTool object
     return 0;
 }
