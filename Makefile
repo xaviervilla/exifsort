@@ -2,8 +2,8 @@ CPP = g++ -std=c++11
 OPT = -g
 INC = -I inc
 
-OBJ = src/ExifTool.o src/ExifToolPipe.o src/TagInfo.o Place.o Model.o ModelList.o
-HDR = src/ExifTool.h src/ExifToolPipe.h src/TagInfo.h Place.hpp Model.hpp ModelList.hpp
+OBJ = src/ExifTool.o src/ExifToolPipe.o src/TagInfo.o Place.o PlaceList.o Model.o ModelList.o
+HDR = src/ExifTool.h src/ExifToolPipe.h src/TagInfo.h Place.hpp PlaceList.hpp Model.hpp ModelList.hpp
 
 all:    exifsort 
 

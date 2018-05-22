@@ -4,6 +4,32 @@ Place::Place(){
     this->radius = 0.0f;
     this->longitude = 0.0f;
     this->latitude = 0.0f;
+    this->place = "NULL";
+    this->nextPlace = NULL;
+}
+
+Place::Place(char *GPSPosition, float radius = 0.01){
+    this->radius = radius;
+    
+    // Make a copy before we fuck it up
+    char cpy[strlen(GPSPosition)];
+    for(int i=0; i < strlen(GPSPosition); i++){
+        cpy[i] = GPSPosition[i];
+    }
+    cpy[strlen(GPSPosition)] = '\0';
+    
+    char* p = strtok (cpy,",");
+    this->latitude = stripAndConvert(p); // North/South
+
+    p = strtok(NULL, ",");
+    this->longitude = stripAndConvert(p); // East/West
+    
+    std::stringstream ss;
+    ss << "\"" << this->latitude << "," << this->longitude << "," << this->radius << "\"";
+    this->place = ss.str();
+    
+    this->nextPlace = new Place();
+    
 }
 
 void Place::setPlace(char *GPSPosition, float radius = 0.01){
@@ -21,6 +47,20 @@ void Place::setPlace(char *GPSPosition, float radius = 0.01){
 
     p = strtok(NULL, ",");
     this->longitude = stripAndConvert(p); // East/West
+    
+    std::stringstream ss;
+    ss << "\"" << this->latitude << "," << this->longitude << "," << this->radius << "\"";
+    this->place = ss.str();
+    
+    this->nextPlace = new Place();
+}
+
+void Place::setNext(Place *nextPlace){
+    this->nextPlace = nextPlace;
+}
+
+Place* Place::next(){
+    return this->nextPlace;
 }
 
 float Place::stripAndConvert(char *half){
@@ -76,3 +116,5 @@ float Place::getLongitude(){ return longitude; }
 float Place::getLatitude(){ return latitude; }
 
 float Place::getRadius(){ return radius;}
+
+std::string Place::placeString(){ return place; } 

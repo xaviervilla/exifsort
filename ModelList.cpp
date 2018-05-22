@@ -18,7 +18,7 @@ void ModelList::addModel(std::string model){
     
     // This is the case when the linked list is empty
     if(!headModel->modelString().compare("NULL")){
-        std::cout <<  "detected:\t" << model << std::endl;
+        std::cout <<  "Unwanted device detected:\t" << model << std::endl;
         headModel = temp;
         tailModel = temp->next();
     }
@@ -36,7 +36,7 @@ void ModelList::addModel(std::string model){
         if(it->matches(model)){
             return;
         }
-        std::cout <<  "detected:\t" << model << std::endl;
+        std::cout <<  "Unwanted device detected:\t" << model << std::endl;
         it->setNext(temp);
         tailModel = it->next()->next();
     }

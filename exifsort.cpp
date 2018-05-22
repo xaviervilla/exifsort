@@ -8,7 +8,7 @@
 #include "nlohmann/json.hpp"
 
 // Created Libraries
-#include "Place.hpp"
+#include "PlaceList.hpp"
 #include "ModelList.hpp"
 
 #define EXCLUSIONARY_PARAMETERS "parameters/to_exlcude.json"
@@ -20,10 +20,12 @@ using namespace std;
 
 
 int buildExclusions(char** arg){
-    // create new Place Object
-    Place *location = new Place();
+    // Create a linked-list to store device models in
+    PlaceList *list = new PlaceList();
+    
     // create our ExifTool object
     ExifTool *et = new ExifTool();
+    
     // read metadata from the image
     TagInfo *info;
     float radius = 0.6f;
@@ -38,23 +40,30 @@ int buildExclusions(char** arg){
     ofstream f(EXCLUSIONARY_PARAMETERS);
     ostringstream o;
     f << "{" << endl << "\t" << "\"to_exclude\": {" << endl << "\t\t" <<  "\"GPSPosition\": [" << endl;
-
+    
     if (info) {
-        // print and save returned information
-        for (TagInfo *i=info; i; i=i->next) {
+        // create a linked list of locations
+        TagInfo *i;
+        for (i=info; i; i=i->next) {
             if(strcmp(i->name, "GPSPosition") == 0){
-                location->setPlace(i->value, radius);
-                f << o.str();
-                o.str("");
-                o << "\t\t\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "," << location->getRadius() << "\"," << endl;
-                std::cout <<  "detected:\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "\"" << std::endl;
+                list->addPlace(i->value, radius);
             }
         }
-        std::cout <<  "detected:\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "\"" << std::endl;
-        f << "\t\t\t" << "\"" << location->getLatitude() << "," << location->getLongitude() << "," << location->getRadius() << "\"" << endl;
+        
+        // Print each link in the list to the JSON file
+        Place *head = list->getHead();
+        Place *tail = list->getTail();
+        Place *temp = head;
+        
+        while(temp->next() != tail){
+            f << "\t\t\t" << temp->placeString() << "," << endl;
+            temp = temp->next();
+        }
+        f << "\t\t\t" << temp->placeString() << endl;
+        
         // we are responsible for deleting the information when done
         delete info;
-        delete location;
+        delete i;
     }
 	else if (et->LastComplete() <= 0) {
         cerr << "Error executing exiftool!" << endl;
@@ -66,6 +75,7 @@ int buildExclusions(char** arg){
     // print exiftool stderr messages
     char *err = et->GetError();
     if (err) cout << err;
+    delete list;    // delete our list
     delete et;      // delete our ExifTool object
     return 0;
 }
@@ -77,6 +87,7 @@ int buildInclusions(char** arg){
     
     // create our ExifTool object
     ExifTool *et = new ExifTool();
+    
     // read metadata from the image
     TagInfo *info = et->ImageInfo(arg[2]);
 
@@ -86,8 +97,6 @@ int buildInclusions(char** arg){
 
     if (info) {
         // create a linked list of devices without duplicates
-        string filename;
-        string tmp;
         TagInfo *i;
         for (i=info; i; i=i->next) {
             if(strcmp(i->name, "Model") == 0){
@@ -141,25 +150,31 @@ int filter(char **arg){
     es >> exc;
     es.close();
     
-    cout << endl;
-    cout << "Raw JSON exclusion" << endl;
-    auto excludes = exc.find("to_exclude");
-    cout << excludes.value() << endl;
-    
-    cout << endl;
-    cout << "Raw JSON inclusion" << endl;
     auto includes = inc.find("to_include");
-    cout << includes.value() << endl;
+    auto excludes = exc.find("to_exclude");
+    
+//    cout << endl;
+//    cout << "Raw JSON exclusion" << endl;
+//    cout << excludes.value() << endl;
+//    
+//    cout << endl;
+//    cout << "Raw JSON inclusion" << endl;
+//    cout << includes.value() << endl;
     
     cout << endl;
-    cout << "Exclude the following:" << endl;
-    for (int i = 0; i < excludes.value()["GPSPosition"].size(); i++){ cout << excludes.value()["GPSPosition"][i] << endl; }
-    
+    cout << "Only including the following devices:" << endl;
+    for (int i = 0; i < includes.value()["Model"].size(); i++){
+        cout << includes.value()["Model"][i] << endl;
+    }
     cout << endl;
-    cout << "Include the following:" << endl;
-    for (int i = 0; i < includes.value()["Model"].size(); i++){ cout << includes.value()["Model"][i] << endl; }
     
+    cout << "Excluding all of the following locations:" << endl;
+    for (int i = 0; i < excludes.value()["GPSPosition"].size(); i++){ 
+        cout << excludes.value()["GPSPosition"][i] << endl;
+    }
     cout << endl;
+    
+    
     
     return 0;
 }
