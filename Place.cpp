@@ -8,7 +8,32 @@ Place::Place(){
     this->nextPlace = NULL;
 }
 
-Place::Place(char *GPSPosition, float radius = 0.01){
+Place::Place(std::string place){
+    
+    std::stringstream ss;
+    int i;
+    for(i = 0; place[i] != ','; i++){
+        ss << place[i];
+    }
+    this->latitude = atof(ss.str().c_str());
+    i++;
+    
+    ss.str(std::string());
+    for(i = i; place[i] != ','; i++){
+        ss << place[i];
+    }
+    this->longitude = atof(ss.str().c_str());
+    i++;
+    
+    ss.str(std::string());
+    for(i = i; place[i] != '\0'; i++){
+        ss << place[i];
+    }
+    this->radius = atof(ss.str().c_str());    
+    this->nextPlace = new Place();
+}
+
+Place::Place(char *GPSPosition, float radius = 0.0003){
     this->radius = radius;
     
     // Make a copy before we fuck it up
@@ -32,7 +57,7 @@ Place::Place(char *GPSPosition, float radius = 0.01){
     
 }
 
-void Place::setPlace(char *GPSPosition, float radius = 0.01){
+void Place::setPlace(char *GPSPosition, float radius = 0.0003){
     this->radius = radius;
 
     // Make a copy before we fuck it up

@@ -18,7 +18,7 @@ public:
     ModelList(std::string model);
     Model* getHead();
     Model* getTail();
-    void addModel(std::string model);
+    void addModel(std::string model, bool display);
     void printList();
     ~ModelList();
 };

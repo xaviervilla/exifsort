@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string.h>
 #include <sstream>
+#include <vector>
+#include <iterator>
 #include <math.h>
 
 class Place{
@@ -16,6 +18,7 @@ class Place{
     Place *nextPlace;
 public:
     Place();
+    Place(std::string place);
     Place(char *place, float radius);
     void setPlace(char *GPSPosition, float radius);
     bool samePlace(char *GPSPosition);

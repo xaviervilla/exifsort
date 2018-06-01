@@ -12,13 +12,15 @@ ModelList::ModelList(std::string model){
 }
 
 
-void ModelList::addModel(std::string model){
+void ModelList::addModel(std::string model, bool display){
     // Create node for our new model
     Model *temp = new Model(model);
     
     // This is the case when the linked list is empty
     if(!headModel->modelString().compare("NULL")){
-        std::cout <<  "Unwanted device detected:\t" << model << std::endl;
+        if(display)
+            std::cout <<  "Desired device detected:\t";
+        std::cout  << model << std::endl;
         headModel = temp;
         tailModel = temp->next();
     }
@@ -36,7 +38,9 @@ void ModelList::addModel(std::string model){
         if(it->matches(model)){
             return;
         }
-        std::cout <<  "Unwanted device detected:\t" << model << std::endl;
+        if(display)
+            std::cout <<  "Desired device detected:\t";
+        std::cout  << model << std::endl;
         it->setNext(temp);
         tailModel = it->next()->next();
     }

@@ -28,7 +28,7 @@ int buildExclusions(char** arg){
     
     // read metadata from the image
     TagInfo *info;
-    float radius = 0.6f;
+    float radius = .0005;
     if(strcmp(arg[2], "-r") == 0){
         info = et->ImageInfo(arg[4]);
         radius = atof(arg[3]);
@@ -100,7 +100,7 @@ int buildInclusions(char** arg){
         TagInfo *i;
         for (i=info; i; i=i->next) {
             if(strcmp(i->name, "Model") == 0){
-                list->addModel(i->value);
+                list->addModel(i->value, 1);
             }
         }
 
@@ -153,29 +153,55 @@ int filter(char **arg){
     auto includes = inc.find("to_include");
     auto excludes = exc.find("to_exclude");
     
-//    cout << endl;
-//    cout << "Raw JSON exclusion" << endl;
-//    cout << excludes.value() << endl;
-//    
-//    cout << endl;
-//    cout << "Raw JSON inclusion" << endl;
-//    cout << includes.value() << endl;
+    ModelList *models = new ModelList();
+    PlaceList *places = new PlaceList();
     
     cout << endl;
     cout << "Only including the following devices:" << endl;
     for (int i = 0; i < includes.value()["Model"].size(); i++){
-        cout << includes.value()["Model"][i] << endl;
+        models->addModel(includes.value()["Model"][i], 0);
     }
     cout << endl;
     
     cout << "Excluding all of the following locations:" << endl;
     for (int i = 0; i < excludes.value()["GPSPosition"].size(); i++){ 
-        cout << excludes.value()["GPSPosition"][i] << endl;
+        places->addPlace(excludes.value()["GPSPosition"][i]);
     }
     cout << endl;
     
+    // Now we actually need to read in a new image and compare the metadata.
+    // create our ExifTool object
+    ExifTool *et = new ExifTool();
     
+    // read metadata from the image
+    TagInfo *info = et->ImageInfo(arg[2]);
     
+    // Compare Metadata
+    if (info) {
+        // create a linked list of devices without duplicates
+        TagInfo *i;
+        for (i=info; i; i=i->next) {
+            if(strcmp(i->name, "Model") == 0){
+                //Check model list for absence
+                //if absent, delete
+                //if (models->unwanted(i->value)){
+                //    cout << "Device is unwanted:\t" << i->value << endl;
+                //}
+            }
+            else if(strcmp(i->name, "GPSPosition") == 0){
+                //check GPS position for containment
+                //if contained, delete
+                if (places->unwanted(i->value)){
+                    cout << "Place is unwanted:\t " << i->value << endl;
+                }
+                else {
+                    cout << "Place is WANTED:\t " << i->value << endl;
+                }
+            }
+        }
+    }
+    
+    delete et; // We are responsible for deleting this
     return 0;
 }
 

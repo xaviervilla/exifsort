@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string.h>
+#include <sstream>
+#include <cmath>
 
 #include "Place.hpp"
 
@@ -16,8 +18,9 @@ public:
     PlaceList(char *place, float radius);
     Place* getHead();
     Place* getTail();
-    bool isInRange(std::string place);
+    bool unwanted(char* place);
     void addPlace(char *place, float radius);
+    void addPlace(std::string place);
     void printList();
     ~PlaceList();
 };
