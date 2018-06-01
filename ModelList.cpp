@@ -62,6 +62,21 @@ Model* ModelList::getTail(){
     return this->tailModel;
 }
 
+bool ModelList::unwanted(std::string model){
+    
+    Model *it = headModel;
+    while(it!=tailModel){
+        if(it->matches(model)){
+            return false; // we have  wanted model
+        }
+        it = it->next();
+    }
+    if(it){
+        return false; // we have a wanted model
+    }
+    
+    return true;
+}
 
 ModelList::~ModelList(){
     Model *it = headModel;

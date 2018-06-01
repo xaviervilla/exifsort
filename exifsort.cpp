@@ -176,30 +176,55 @@ int filter(char **arg){
     // read metadata from the image
     TagInfo *info = et->ImageInfo(arg[2]);
     
+    // image currently being looked at
+    string currImage;
+    bool currKeep = true;
+    int delCount = 0;
+    int checkCount = 0;
+    
     // Compare Metadata
     if (info) {
         // create a linked list of devices without duplicates
         TagInfo *i;
         for (i=info; i; i=i->next) {
-            if(strcmp(i->name, "Model") == 0){
+            //cout << "i->name:\t" << i->name  << endl;
+            if(strcmp(i->name, "SourceFile") == 0){
+                currImage = i->value;
+                currKeep = true;
+                checkCount++;
+            }
+            if(strcmp(i->name, "Model") == 0 && currKeep){
                 //Check model list for absence
                 //if absent, delete
-                //if (models->unwanted(i->value)){
-                //    cout << "Device is unwanted:\t" << i->value << endl;
-                //}
+                if(models->unwanted(i->value)){
+                    //cout << "Device is unwanted:\t" << i->value << endl;
+                    cout << "delete:\t" << currImage << endl;
+                    currKeep = false;
+                    delCount++;
+                }
+                else{
+                    //cout << "Device is WANTED:\t" << i->value << endl;
+                    cout << "KEEP:\t" << currImage << endl;
+                }
             }
-            else if(strcmp(i->name, "GPSPosition") == 0){
+            else if(strcmp(i->name, "GPSPosition") == 0 && currKeep){
                 //check GPS position for containment
                 //if contained, delete
                 if (places->unwanted(i->value)){
-                    cout << "Place is unwanted:\t " << i->value << endl;
+                    //cout << "Place is unwanted:\t " << i->value << endl;
+                    cout << "delete:\t" << currImage << endl;
+                    currKeep = false;
+                    delCount++;
                 }
                 else {
-                    cout << "Place is WANTED:\t " << i->value << endl;
+                    //cout << "Place is WANTED:\t " << i->value << endl;
+                    cout << "KEEP:\t" << currImage << endl;
                 }
             }
         }
     }
+    
+    cout << endl << "Complete!" << endl << "total images checked: " << checkCount << " and total images deleted: " << delCount << endl << "Percent deleted: " << 100.0*((float)delCount/checkCount) << endl;
     
     delete et; // We are responsible for deleting this
     return 0;

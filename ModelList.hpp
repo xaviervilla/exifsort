@@ -19,6 +19,7 @@ public:
     Model* getHead();
     Model* getTail();
     void addModel(std::string model, bool display);
+    bool unwanted(std::string model);
     void printList();
     ~ModelList();
 };
