@@ -77,13 +77,7 @@ bool PlaceList::unwanted(char *GPSPosition){
         }
         it = it->next();
     }
-    
-    // Dont forget about the tail
-    if(std::abs(temp->getLatitude()-it->getLatitude()) < it->getRadius() && std::abs(temp->getLongitude()-it->getLongitude()) < it->getRadius()){
-            delete temp;
-            return true;
-    }
-    
+        
     delete temp;
     return false;
 }

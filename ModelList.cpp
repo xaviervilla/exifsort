@@ -71,9 +71,6 @@ bool ModelList::unwanted(std::string model){
         }
         it = it->next();
     }
-    if(it){
-        return false; // we have a wanted model
-    }
     
     return true;
 }
