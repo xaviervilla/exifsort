@@ -17,6 +17,7 @@
 
 #define EXCLUSIONARY_PARAMETERS "parameters/to_exlcude.json"
 #define INCLUSIONARY_PARAMETERS "parameters/to_inclcude.json"
+std::string DESTINATION = "";
 std::string DELETED_FOLDER = "images/deleted/";
 std::string KEEP_FOLDER = "images/filtered/";
 
@@ -181,22 +182,30 @@ int filter(char **arg){
     ModelList *models = new ModelList();
     PlaceList *places = new PlaceList();
     
-    int dir_err = mkdir("images/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if(arg[3]){
+        DESTINATION = arg[3];
+    }
+    string temp = DESTINATION;
+    
+    int dir_err = mkdir(temp.append("images/").c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    cout << temp<< endl;
     if (-1 == dir_err && errno != EEXIST)
             {
-                printf("Error creating directory!\n");
+                printf("Error creating directory 1!\n");
                 exit(1);
             }
-    dir_err = mkdir(KEEP_FOLDER.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    temp = DESTINATION;
+    dir_err = mkdir(temp.append(KEEP_FOLDER).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (-1 == dir_err && errno != EEXIST)
             {
-                printf("Error creating directory!\n");
+                printf("Error creating directory 2!\n");
                 exit(1);
             }
-    dir_err = mkdir(DELETED_FOLDER.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    temp = DESTINATION;
+    dir_err = mkdir(temp.append(DELETED_FOLDER).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (-1 == dir_err && errno != EEXIST)
             {
-                printf("Error creating directory!\n");
+                printf("Error creating directory 3!\n");
                 exit(1);
             }
     
@@ -205,8 +214,8 @@ int filter(char **arg){
     for (int i = 0; i < includes.value()["Model"].size(); i++){
         models->addModel(includes.value()["Model"][i], 0);
             // this is convenient place to create folders to house our devices by name of device
-        string tmp = KEEP_FOLDER;
-            dir_err = mkdir(tmp.append(includes.value()["Model"][i]).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        string tmp = DESTINATION;
+            dir_err = mkdir(tmp.append(KEEP_FOLDER).append(includes.value()["Model"][i]).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err && errno != EEXIST)
             {
                 printf("Error creating directory!\n");
@@ -232,7 +241,6 @@ int filter(char **arg){
     string currImage;
     string currDevice;
     string fileName;
-    string temp;
     bool currKeep = true;
     int delCount = 0;
     int checkCount = 0;
@@ -256,12 +264,12 @@ int filter(char **arg){
             if(strcmp(i->name, "SourceFile") == 0){
                 // We just finished with the previous image
                 if(currKeep){
-                    temp = KEEP_FOLDER;
-                    copy_file(currImage, temp.append(currDevice).append("/").append(fileName));
+                    temp = DESTINATION;
+                    copy_file(currImage, temp.append(KEEP_FOLDER).append(currDevice).append("/").append(fileName));
                 }
                 else{
-                    temp = DELETED_FOLDER;
-                    copy_file(currImage, temp.append(fileName));
+                    temp = DESTINATION;
+                    copy_file(currImage, temp.append(DELETED_FOLDER).append(fileName));
                 }
                 currImage = i->value;
                 currKeep = true;
@@ -306,12 +314,12 @@ int filter(char **arg){
         }
         // We still have to check the last image
         if(currKeep){
-            temp = KEEP_FOLDER;
-            copy_file(currImage, temp.append(currDevice).append("/").append(fileName));
+            temp = DESTINATION;
+            copy_file(currImage, temp.append(KEEP_FOLDER).append(currDevice).append("/").append(fileName));
         }
         else{
-            temp = DELETED_FOLDER;
-            copy_file(currImage, temp.append(fileName));
+            temp = DESTINATION;
+            copy_file(currImage, temp.append(DELETED_FOLDER).append(fileName));
         }
         checkCount++;
     }
@@ -332,7 +340,7 @@ void readRights(){
         cout << "./exifsort -build-inclusions <filepath_to_inclusions>" << endl << endl;
         cout << "This option recursively writes the model of phone/camera of all images in the directory provided to a JSON file as an inclusionary parameter to be utilized during the filtering process. During filtering, any image tested that was taken with a camera or phone model that is not an inclusionary parameter will be moved to the deleted folder." << endl << endl;
         
-        cout << "./exifsort -filter <filepath_to_filter>" << endl << endl;
+        cout << "./exifsort -filter <filepath_to_filter> (Optionally: <destination_folder>)" << endl << endl;
         cout << "This filtering process utilizes two methods to screen image files. 1) This option recursively checks the Model of camera and/or phone used to take the photo, and compares it to a list of inclusionary parameters saved in a JSON file. These inclusionary parameters can be created using the `-build-inclusions` flag. If the camera or phone's model checked is not an inclusionary parameter, it will be immediately moved to the deleted folder. 2) This option also recursively checks the GPS coordinates of all images in the directory provided, comparing the GPS coordinates with exclusion parameters saved in a JSON file. These exclusionary parameters can be created using the `-build-exclusions` flag. If any image in the directory provided is within radius of an exclusion parameter, it will be moved to the deleted folder." << endl << endl;
     }
 
