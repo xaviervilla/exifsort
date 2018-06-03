@@ -2,6 +2,10 @@
 #include <fstream>
 #include <string.h>
 #include <sstream>
+#include <sys/stat.h> //mkdir
+#include <fcntl.h>   // open
+#include <unistd.h>  // read, write, close
+#include <cstdio>    // BUFSIZ
 
 // Imported Libraries
 #include "src/ExifTool.h"
@@ -13,6 +17,8 @@
 
 #define EXCLUSIONARY_PARAMETERS "parameters/to_exlcude.json"
 #define INCLUSIONARY_PARAMETERS "parameters/to_inclcude.json"
+std::string DELETED_FOLDER = "images/deleted/";
+std::string KEEP_FOLDER = "images/filtered/";
 
 // for convenience
 using json = nlohmann::json;
@@ -138,6 +144,25 @@ int buildInclusions(char** arg){
 }
 
 
+void copy_file(string sourceFile, string destFile){
+    char buf[BUFSIZ];
+    size_t size;
+    
+//    string tmp = KEEP_FOLDER;
+//            dir_err = mkdir(tmp.append(includes.value()["Model"][i]).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    int source = open(sourceFile.c_str(), O_RDONLY, 0);
+    int dest = open(destFile.c_str(), O_WRONLY | O_CREAT /*| O_TRUNC/**/, 0644);
+
+    while ((size = read(source, buf, BUFSIZ)) > 0) {
+        write(dest, buf, size);
+    }
+
+    close(source);
+    close(dest);
+}
+
+
 int filter(char **arg){
     // read JSON inclusion file
     ifstream is(INCLUSIONARY_PARAMETERS);
@@ -156,10 +181,37 @@ int filter(char **arg){
     ModelList *models = new ModelList();
     PlaceList *places = new PlaceList();
     
+    int dir_err = mkdir("images/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (-1 == dir_err && errno != EEXIST)
+            {
+                printf("Error creating directory!\n");
+                exit(1);
+            }
+    dir_err = mkdir(KEEP_FOLDER.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (-1 == dir_err && errno != EEXIST)
+            {
+                printf("Error creating directory!\n");
+                exit(1);
+            }
+    dir_err = mkdir(DELETED_FOLDER.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (-1 == dir_err && errno != EEXIST)
+            {
+                printf("Error creating directory!\n");
+                exit(1);
+            }
+    
     cout << endl;
     cout << "Only including the following devices:" << endl;
     for (int i = 0; i < includes.value()["Model"].size(); i++){
         models->addModel(includes.value()["Model"][i], 0);
+            // this is convenient place to create folders to house our devices by name of device
+        string tmp = KEEP_FOLDER;
+            dir_err = mkdir(tmp.append(includes.value()["Model"][i]).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            if (-1 == dir_err && errno != EEXIST)
+            {
+                printf("Error creating directory!\n");
+                exit(1);
+            }
     }
     cout << endl;
     
@@ -178,50 +230,90 @@ int filter(char **arg){
     
     // image currently being looked at
     string currImage;
+    string currDevice;
+    string fileName;
+    string temp;
     bool currKeep = true;
     int delCount = 0;
     int checkCount = 0;
     
     // Compare Metadata
     if (info) {
-        // create a linked list of devices without duplicates
-        TagInfo *i;
-        for (i=info; i; i=i->next) {
-            //cout << "i->name:\t" << i->name  << endl;
+        
+        //first image name, 
+        TagInfo *i = info;
+        if(strcmp(i->name, "SourceFile") == 0){
+            currImage = i->value;
+            checkCount++;
+        }
+        else{
+            // Should never occur
+            cout << "Error with first filename read";
+            exit(1);
+        }
+        
+        for (i=info->next; i; i=i->next) {
             if(strcmp(i->name, "SourceFile") == 0){
+                // We just finished with the previous image
+                if(currKeep){
+                    temp = KEEP_FOLDER;
+                    copy_file(currImage, temp.append(currDevice).append("/").append(fileName));
+                }
+                else{
+                    temp = DELETED_FOLDER;
+                    copy_file(currImage, temp.append(fileName));
+                }
                 currImage = i->value;
                 currKeep = true;
                 checkCount++;
             }
-            if(strcmp(i->name, "Model") == 0 && currKeep){
+            
+            if(strcmp(i->name, "FileName") == 0){
+                // We just finished with the previous image
+                fileName = i->value;
+            }
+            
+            else if(strcmp(i->name, "Model") == 0 && currKeep){
                 //Check model list for absence
                 //if absent, delete
+                currDevice = i->value;
                 if(models->unwanted(i->value)){
                     //cout << "Device is unwanted:\t" << i->value << endl;
-                    cout << "delete:\t" << currImage << endl;
+                    cout << "delete by device:\t" << currImage << endl;
                     currKeep = false;
                     delCount++;
                 }
                 else{
                     //cout << "Device is WANTED:\t" << i->value << endl;
-                    cout << "KEEP:\t" << currImage << endl;
+                    //cout << "KEEP:\t\t\t" << currImage << endl;
                 }
             }
+            
             else if(strcmp(i->name, "GPSPosition") == 0 && currKeep){
                 //check GPS position for containment
                 //if contained, delete
                 if (places->unwanted(i->value)){
                     //cout << "Place is unwanted:\t " << i->value << endl;
-                    cout << "delete:\t" << currImage << endl;
+                    cout << "delete by location:\t" << currImage << endl;
                     currKeep = false;
                     delCount++;
                 }
                 else {
                     //cout << "Place is WANTED:\t " << i->value << endl;
-                    cout << "KEEP:\t" << currImage << endl;
+                    //cout << "KEEP:\t\t\t" << currImage << endl;
                 }
-            }
+            }            
         }
+        // We still have to check the last image
+        if(currKeep){
+            temp = KEEP_FOLDER;
+            copy_file(currImage, temp.append(currDevice).append("/").append(fileName));
+        }
+        else{
+            temp = DELETED_FOLDER;
+            copy_file(currImage, temp.append(fileName));
+        }
+        checkCount++;
     }
     
     cout << endl << "Complete!" << endl << "total images checked: " << checkCount << " and total images deleted: " << delCount << endl << "Percent deleted: " << 100.0*((float)delCount/checkCount) << endl;
