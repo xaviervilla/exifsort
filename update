@@ -1,0 +1,10 @@
+#!/bin/bash
+clear &&
+
+echo "LEARNING DESIRED DEVICES:"
+./exifsort -build-inclusions images/wanted_devices/ &&
+
+echo "" && echo "LEARNING UNDESIREABLE LOCATIONS:" &&
+./exifsort -build-exclusions images/unwanted_locations/ &&
+
+echo "" && echo "LEARNING COMPLETE!" && echo ""
