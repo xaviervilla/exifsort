@@ -74,6 +74,11 @@ int buildExclusions(char** arg){
     }
 	else if (et->LastComplete() <= 0) {
         cerr << "Error executing exiftool!" << endl;
+        return 2;
+    }
+    else{
+        cout << "Error: " << arg[2] << endl;
+        return 1;
     }
 
     // Finish our JSON creation
@@ -128,9 +133,11 @@ int buildInclusions(char** arg){
     }
 	else if (et->LastComplete() <= 0) {
         cerr << "Error executing exiftool!" << endl;
+        return 2;
     }
     else{
-        cout << "Error, check your input. " << arg[2] << endl;
+        cout << "Error: " << arg[2] << endl;
+        return 1;
     }
 
     // Finish our JSON creation
@@ -352,15 +359,17 @@ int main(int argc, char **argv){
     
     if(strcmp(argv[1], "-build-exclusions") == 0){
         int err = buildExclusions(argv);
-        if(err) cout << "Something went wrong building the exclusions." << endl;
+        if(err == 1) cout << "Something went wrong building the exclusions. Is the exclusion folder empty?" << endl;
+        else if (err == 2) cout << "Something went wrong building the exclusions. Is exiftool installed? (if no, run 'sudo apt-get install exiftool' and try again)" << endl;
     }
     else if(strcmp(argv[1], "-build-inclusions") == 0){
         int err = buildInclusions(argv);
-        if(err) cout << "Something went wrong building the inclusions." << endl;
+        if(err == 1) cout << "Something went wrong building the inclusions. Is the inclusion folder empty?" << endl;
+        else if (err == 2) cout << "Something went wrong building the inclusions. Is exiftool installed? (if no, run 'sudo apt-get install exiftool' and try again)" << endl;
     }
     else if(strcmp(argv[1], "-filter") == 0){
         int err = filter(argv);
-        if(err) cout << "Something went wrong building the exclusions." << endl;
+        if(err == 1) cout << "Something went wrong with the filtering process." << endl;
     }
     else{
         readRights();
